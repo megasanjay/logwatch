@@ -7,13 +7,12 @@ export default defineEventHandler(async (event) => {
       id: true,
       name: true,
       description: true,
+      channels: true,
     },
     where: {
       user_id: user.id,
     },
   });
-
-  console.log("applications", applications);
 
   return applications || [];
 });

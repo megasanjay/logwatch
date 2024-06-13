@@ -15,28 +15,37 @@ const toggleMobileMenu = () => {
   >
     <div class="relative z-20 mx-auto w-full bg-slate-800 px-5 text-white">
       <header class="mb-2 flex items-center justify-between py-4">
-        <NuxtLink
-          href="/"
-          class="inline-flex items-center gap-2.5 text-xl font-bold"
-          aria-label="logo"
-        >
-          <img
-            src="https://www.svgrepo.com/show/227168/log-wood.svg"
-            alt="logwatch"
-            class="h-8 w-8"
-          />
-
-          logwatch
-        </NuxtLink>
-
         <nav class="hidden items-center gap-4 lg:flex">
           <NuxtLink
-            href="/dashboard"
+            href="/"
+            class="mr-4 inline-flex items-center gap-2.5 text-xl font-bold"
+            aria-label="logo"
+          >
+            <img
+              src="https://www.svgrepo.com/show/227168/log-wood.svg"
+              alt="logwatch"
+              class="h-8 w-8"
+            />
+
+            logwatch
+          </NuxtLink>
+
+          <NuxtLink
+            href="/applications"
             class="font-medium text-white transition-all hover:text-slate-200"
           >
             Dashboard
           </NuxtLink>
 
+          <NuxtLink
+            href="/applications"
+            class="font-medium text-white transition-all hover:text-slate-200"
+          >
+            Applications
+          </NuxtLink>
+        </nav>
+
+        <nav class="hidden items-center gap-4 lg:flex">
           <NuxtLink
             href="https://github.com/megasanjay/logwatch"
             class="font-medium text-white transition-all hover:text-slate-200"

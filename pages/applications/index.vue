@@ -38,7 +38,7 @@ const createApplication = () => {
       })
         .then((res) => {
           if ("application" in res) {
-            applications.value?.push(res.application);
+            applications.value?.push({ ...res.application, channels: [] });
             push.success("Application created successfully.");
 
             newApplicationModal.value = false;
@@ -127,6 +127,31 @@ const createApplication = () => {
       </n-modal>
     </div>
 
-    <div class="p-10">{{ applications }}</div>
+    <div class="divide divide-y p-10">
+      <NuxtLink
+        :to="`/applications/${application.id}`"
+        v-for="application in applications"
+        :key="application.id"
+        class="flex min-h-[65px] cursor-pointer items-center px-2 py-3 transition-all hover:bg-slate-100"
+      >
+        <div class="flex-1">
+          <div class="flex flex-col">
+            <NuxtLink :to="`/applications/${application.id}`">
+              <span
+                class="text-blue-500 transition-all hover:text-blue-600 hover:underline"
+              >
+                {{ application.name }}
+              </span>
+            </NuxtLink>
+
+            <p class="text-gray-500">{{ application.description }}</p>
+          </div>
+        </div>
+
+        <n-tag type="info">
+          {{ application.channels.length || "No environments added" }}
+        </n-tag>
+      </NuxtLink>
+    </div>
   </main>
 </template>

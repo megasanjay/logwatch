@@ -41,14 +41,16 @@ model Application {
   user    User   @relation(references: [id], fields: [user_id], onDelete: Cascade)
   user_id String
 
-  Environment Environment[]
+  channels Channel[]
 }
 
-model Environment {
+model Channel {
   id String @id @default(cuid())
 
   name String
   slug String
+
+  description String @default("")
 
   public    Boolean @default(false)
   share_url String  @default("")
@@ -69,6 +71,6 @@ model Log {
 
   created DateTime @default(now())
 
-  environment    Environment @relation(references: [id], fields: [environment_id], onDelete: Cascade)
-  environment_id String
+  channel    Channel @relation(references: [id], fields: [channel_id], onDelete: Cascade)
+  channel_id String
 }
