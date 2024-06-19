@@ -16,6 +16,7 @@
 
 <script setup lang="ts">
 import { pastelTheme } from "notivue";
+import { faker } from "@faker-js/faker";
 import type { ThemeConfig } from "@bg-dev/nuxt-naiveui";
 
 const themeConfig: ThemeConfig = {
@@ -91,5 +92,28 @@ useSeoMeta({
     "https://images.unsplash.com/photo-1543332164-6e82f355badc?q=80&w=2970&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   ogTitle: "logwatch",
   twitterCard: "summary_large_image",
+});
+
+onMounted(() => {
+  // Set an interval to log events for the app
+  // setInterval(async () => {
+  //   await $fetch("/api/log/clxd3f6td00031iuojoryo791", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({
+  //       message: faker.lorem.sentence(),
+  //       level: faker.helpers.arrayElement([
+  //         "info",
+  //         "warn",
+  //         "error",
+  //         "debug",
+  //         "trace",
+  //         "fatal",
+  //       ]),
+  //     }),
+  //   });
+  // }, 4000);
 });
 </script>
