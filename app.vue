@@ -96,24 +96,31 @@ useSeoMeta({
 
 onMounted(() => {
   // Set an interval to log events for the app
-  // setInterval(async () => {
-  //   await $fetch("/api/log/clxd3f6td00031iuojoryo791", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify({
-  //       message: faker.lorem.sentence(),
-  //       level: faker.helpers.arrayElement([
-  //         "info",
-  //         "warn",
-  //         "error",
-  //         "debug",
-  //         "trace",
-  //         "fatal",
-  //       ]),
-  //     }),
-  //   });
-  // }, 4000);
+  setInterval(async () => {
+    // Log an event on a random chance
+    if (Math.random() < 0.75) {
+      return;
+    }
+
+    console.log("Logging event");
+
+    await $fetch("/api/log/clxd3f6td00031iuojoryo791", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: faker.lorem.sentence(),
+        level: faker.helpers.arrayElement([
+          "info",
+          "warn",
+          "error",
+          "debug",
+          "trace",
+          "fatal",
+        ]),
+      }),
+    });
+  }, 4000);
 });
 </script>

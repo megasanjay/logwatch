@@ -64,7 +64,7 @@ model Channel {
 }
 
 model Log {
-  id String @id @default(cuid())
+  id Int @id @default(autoincrement())
 
   message String
   level   String

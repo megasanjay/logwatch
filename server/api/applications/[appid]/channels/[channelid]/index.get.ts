@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 export default defineEventHandler(async (event) => {
   const user = protectRoute(event);
 
@@ -5,6 +7,12 @@ export default defineEventHandler(async (event) => {
     appid: string;
     channelid: string;
   };
+
+  const query = getQuery(event);
+
+  console.log("Query", query);
+
+  const period = (query.period as number) || 300;
 
   const channel = await prisma.channel.findFirst({
     include: {
@@ -14,6 +22,9 @@ export default defineEventHandler(async (event) => {
       id: channelid,
     },
   });
+
+  const now = dayjs();
+  const startTime = now.subtract(period, "seconds");
 
   if (!channel) {
     throw createError({
@@ -27,11 +38,14 @@ export default defineEventHandler(async (event) => {
       channel: {
         id: channelid,
       },
+      created: {
+        gte: startTime.toDate(),
+        lte: now.toDate(),
+      },
     },
     orderBy: {
       created: "desc",
     },
-    take: 10,
   });
 
   return {

@@ -12,28 +12,83 @@ const { appid, channelid } = route.params as {
   channelid: string;
 };
 
-const timelinePeriod = ref("1h");
+const loading = ref(false);
+const timelinePeriod = ref(300);
 
 const timelinePeriodOptions = [
-  { label: "1 hour", value: "1h" },
-  { label: "1 day", value: "1d" },
-  { label: "1 week", value: "1w" },
-  { label: "1 month", value: "1m" },
-  { label: "1 year", value: "1y" },
+  {
+    label: "Live",
+    value: 0,
+  },
+  {
+    label: "5 minutes",
+    value: 300,
+  },
+  {
+    label: "1 hour",
+    value: 3600,
+  },
+  {
+    label: "1 day",
+    value: 86400,
+  },
 ];
+
+const logsData = ref<LogEvent[]>([]);
 
 const { data, error } = await useFetch(
   `/api/applications/${appid}/channels/${channelid}`,
   {
     headers: useRequestHeaders(["cookie"]),
+    query: {
+      period: timelinePeriod.value,
+    },
   },
 );
 
 if (error.value) {
-  push.error("Failed to fetch application.");
+  push.error("Failed to fetch channel data.");
 
   await navigateTo("/applications");
 }
+
+if (data.value) {
+  logsData.value = data.value.logs as unknown as LogEvent[];
+}
+
+const onTimelinePeriodChange = async (value: number) => {
+  if (value === 0) {
+    // Live
+    return;
+  }
+
+  if (value === timelinePeriod.value) {
+    return;
+  }
+
+  timelinePeriod.value = value;
+
+  loading.value = true;
+
+  await $fetch(`/api/applications/${appid}/channels/${channelid}`, {
+    headers: useRequestHeaders(["cookie"]),
+    query: {
+      period: value,
+    },
+  })
+    .then((res) => {
+      console.log("onTimelinePeriodChange", res);
+      logsData.value = res.logs as unknown as LogEvent[];
+    })
+    .catch(() => {
+      push.error("Failed to fetch channel data.");
+
+      navigateTo("/applications");
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+};
 </script>
 
 <template>
@@ -49,7 +104,7 @@ if (error.value) {
     <n-layout has-sider>
       <n-layout-sider
         bordered
-        content-style="padding: 24px;"
+        content-style="padding: 0px 24px 24px 24px"
         show-trigger="arrow-circle"
       >
         <n-collapse :default-expanded-names="['Timeline']">
@@ -57,6 +112,8 @@ if (error.value) {
             <n-select
               v-model:value="timelinePeriod"
               :options="timelinePeriodOptions"
+              :on-update:value="onTimelinePeriodChange"
+              :loading="loading"
             />
           </n-collapse-item>
         </n-collapse>
@@ -64,27 +121,56 @@ if (error.value) {
 
       <n-layout>
         <n-layout-header bordered>
-          <div class="flex space-x-2 px-3 pb-2">
+          <div class="mx-3 flex space-x-2 px-3 pb-2">
+            <div class="w-[17px]"></div>
             <div class="w-[166px]">Time</div>
             <div class="w-[72px]">Status</div>
             <div>Message</div>
           </div>
         </n-layout-header>
-        <n-layout-content>
-          <div
-            class="flex space-x-2 px-3 py-1 font-mono text-sm"
-            :class="{
-              'bg-gray-100': index % 2 === 0,
-            }"
-            v-for="(log, index) in data?.logs"
-            :key="log.id"
-          >
-            <div class="w-[166px]">
-              {{ $dayjs(log.created).format("MMM DD HH:mm:ss.SSS") }}
+        <n-layout-content class="px-3 py-2">
+          <n-spin :show="loading">
+            <div
+              class="mx-1 flex cursor-pointer items-center space-x-2 rounded-md px-3 py-1 font-mono text-sm transition-all hover:bg-gray-100"
+              :class="{
+                'bg-slate-100': index % 2 === 0,
+              }"
+              v-for="(log, index) in logsData"
+              :key="log.id"
+            >
+              <div class="flex w-[17px] items-center justify-center">
+                <Icon
+                  name="ic:round-warning"
+                  size="20"
+                  v-if="log.level === 'warn'"
+                  class="text-yellow-500"
+                />
+                <Icon
+                  name="ph:info-fill"
+                  size="20"
+                  v-if="log.level === 'info'"
+                  class="text-blue-500"
+                />
+                <Icon
+                  name="clarity:error-solid"
+                  size="20"
+                  v-if="log.level === 'error'"
+                  class="text-red-500"
+                />
+                <Icon
+                  name="icon-park-solid:error"
+                  size="12"
+                  v-if="log.level === 'fatal'"
+                  class="text-red-500"
+                />
+              </div>
+              <div class="w-[166px]">
+                {{ $dayjs(log.created).format("MMM DD HH:mm:ss.SSS") }}
+              </div>
+              <div class="w-[72px]">{{ log.level }}</div>
+              <div>{{ log.message }}</div>
             </div>
-            <div class="w-[72px]">{{ log.level }}</div>
-            <div>{{ log.message }}</div>
-          </div>
+          </n-spin>
         </n-layout-content>
       </n-layout>
     </n-layout>
