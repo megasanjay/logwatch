@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import { parse } from "vue/compiler-sfc";
 
 export default defineEventHandler(async (event) => {
   const user = protectRoute(event);
@@ -10,7 +11,8 @@ export default defineEventHandler(async (event) => {
 
   const query = getQuery(event);
 
-  const lastLogId = (query.lastLogId as string) || "0";
+  const lastLogId = query.lastLogId as string;
+  const currentTimestamp = dayjs().unix();
 
   const channel = await prisma.channel.findFirst({
     include: {
@@ -28,14 +30,29 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  const hasValidLastLogId = lastLogId && !isNaN(parseInt(lastLogId));
+
+  const parsedLastLogId = hasValidLastLogId ? parseInt(lastLogId) : 0;
+  const parsedLastLogTimestamp = dayjs.unix(currentTimestamp).toISOString();
+
   const logs = await prisma.log.findMany({
     where: {
       channel: {
         id: channelid,
       },
-      id: {
-        gt: parseInt(lastLogId),
-      },
+      ...(hasValidLastLogId
+        ? {
+            // Use lastLogId to filter logs
+            id: {
+              gt: parsedLastLogId,
+            },
+          }
+        : {
+            // Fallback to using lastLogTimestamp to filter logs
+            created: {
+              gt: parsedLastLogTimestamp,
+            },
+          }),
     },
     orderBy: {
       created: "desc",

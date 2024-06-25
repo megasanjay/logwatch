@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import type { FormInst } from "naive-ui";
-
 definePageMeta({
   middleware: ["protected"],
 });
 
 const route = useRoute();
+const dayjs = useDayjs();
 
 const { appid, channelid } = route.params as {
   appid: string;
@@ -15,6 +14,7 @@ const { appid, channelid } = route.params as {
 const loading = ref(false);
 const liveLogsLoading = ref(false);
 const timelinePeriod = ref(300);
+const shownLevels = ref([]);
 
 const shouldGetLiveLogs = ref(false);
 
@@ -32,6 +32,25 @@ const timelinePeriodOptions = [
   {
     label: "1 day",
     value: 86400,
+  },
+];
+
+const levelOptions = [
+  {
+    label: "Info",
+    value: "info",
+  },
+  {
+    label: "Warn",
+    value: "warn",
+  },
+  {
+    label: "Error",
+    value: "error",
+  },
+  {
+    label: "Fatal",
+    value: "fatal",
   },
 ];
 
@@ -91,13 +110,14 @@ const onTimelinePeriodChange = async (value: number) => {
     });
 };
 
-const getLiveLogs = async (lastLogId: number) => {
+const getLiveLogs = async (lastLogId: number, lastLogTimestamp: number) => {
   liveLogsLoading.value = true;
 
   await $fetch(`/api/applications/${appid}/channels/${channelid}/live`, {
     headers: useRequestHeaders(["cookie"]),
     query: {
       lastLogId,
+      lastLogTimestamp,
     },
   })
     .then((res) => {
@@ -128,10 +148,11 @@ const setLiveLogs = async (value: boolean) => {
   }
 
   liveLogsInterval.value = setInterval(async () => {
-    // Get the id of the last log
+    // Get the timestamp of the last log
     const lastLogId = logsData.value[0].id;
+    const lastLogTimestamp = dayjs(logsData.value[0].created).unix();
 
-    await getLiveLogs(lastLogId);
+    await getLiveLogs(lastLogId, lastLogTimestamp);
   }, 1500);
 };
 </script>
@@ -173,6 +194,21 @@ const setLiveLogs = async (value: boolean) => {
               :loading="loading"
             />
           </n-collapse-item>
+          <n-collapse-item title="Level" name="Level">
+            <n-checkbox-group v-model:value="shownLevels">
+              <n-flex vertical>
+                <n-checkbox
+                  v-for="level in levelOptions"
+                  :key="level.value"
+                  :value="level.value"
+                >
+                  {{ level.label }}
+                </n-checkbox>
+              </n-flex>
+            </n-checkbox-group>
+
+            <pre>{{ shownLevels }}</pre>
+          </n-collapse-item>
         </n-collapse>
       </n-layout-sider>
 
@@ -182,7 +218,14 @@ const setLiveLogs = async (value: boolean) => {
             <div class="w-[17px]"></div>
             <div class="w-[166px]">Time</div>
             <div class="w-[72px]">Status</div>
-            <div>Message</div>
+            <div class="flex-1">Message</div>
+            <TransitionFade>
+              <n-flex align="center" v-if="shouldGetLiveLogs">
+                <Icon name="svg-spinners:6-dots-scale-middle" />
+
+                <span> Loading new logs... </span>
+              </n-flex>
+            </TransitionFade>
           </div>
         </n-layout-header>
         <n-layout-content class="px-3 py-2">

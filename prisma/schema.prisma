@@ -52,8 +52,8 @@ model Channel {
 
   description String @default("")
 
-  public    Boolean @default(false)
-  share_url String  @default("")
+  public     Boolean @default(false)
+  share_code String  @default(cuid())
 
   expiration Int
 

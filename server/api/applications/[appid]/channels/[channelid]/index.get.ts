@@ -31,6 +31,22 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  // hacky but works
+  // Delete logs older than expiration
+  const { expiration } = channel; // in mins
+  const expirationTime = now.subtract(expiration, "minutes");
+
+  await prisma.log.deleteMany({
+    where: {
+      channel: {
+        id: channelid,
+      },
+      created: {
+        lte: expirationTime.toDate(),
+      },
+    },
+  });
+
   const logs = await prisma.log.findMany({
     where: {
       channel: {
