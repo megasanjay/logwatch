@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
 
   const query = getQuery(event);
 
-  const period = (query.period as number) || 300;
+  const lastLogId = (query.lastLogId as string) || "0";
 
   const channel = await prisma.channel.findFirst({
     include: {
@@ -20,9 +20,6 @@ export default defineEventHandler(async (event) => {
       id: channelid,
     },
   });
-
-  const now = dayjs();
-  const startTime = now.subtract(period, "seconds");
 
   if (!channel) {
     throw createError({
@@ -36,9 +33,8 @@ export default defineEventHandler(async (event) => {
       channel: {
         id: channelid,
       },
-      created: {
-        gte: startTime.toDate(),
-        lte: now.toDate(),
+      id: {
+        gt: parseInt(lastLogId),
       },
     },
     orderBy: {
@@ -47,21 +43,11 @@ export default defineEventHandler(async (event) => {
   });
 
   return {
-    channel: {
-      id: channel.id,
-      name: channel.name,
-      slug: channel.slug,
-      expiration: channel.expiration,
-    },
-    application: {
-      id: channel.application.id,
-      name: channel.application.name,
-    },
     logs: logs.map((log) => ({
       id: log.id,
+      created: log.created,
       level: log.level,
       message: log.message,
-      created: log.created,
     })),
   };
 });

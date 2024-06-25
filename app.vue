@@ -104,7 +104,7 @@ onMounted(() => {
 
     console.log("Logging event");
 
-    await $fetch("/api/log/clxd3f6td00031iuojoryo791", {
+    await $fetch("/api/log/clxu6ihl00003j1sfrb785hia", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

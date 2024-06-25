@@ -13,13 +13,14 @@ const { appid, channelid } = route.params as {
 };
 
 const loading = ref(false);
+const liveLogsLoading = ref(false);
 const timelinePeriod = ref(300);
 
+const shouldGetLiveLogs = ref(false);
+
+const liveLogsInterval = ref<NodeJS.Timeout | null>(null);
+
 const timelinePeriodOptions = [
-  {
-    label: "Live",
-    value: 0,
-  },
   {
     label: "5 minutes",
     value: 300,
@@ -89,6 +90,50 @@ const onTimelinePeriodChange = async (value: number) => {
       loading.value = false;
     });
 };
+
+const getLiveLogs = async (lastLogId: number) => {
+  liveLogsLoading.value = true;
+
+  await $fetch(`/api/applications/${appid}/channels/${channelid}/live`, {
+    headers: useRequestHeaders(["cookie"]),
+    query: {
+      lastLogId,
+    },
+  })
+    .then((res) => {
+      if (res.logs.length === 0) {
+        return;
+      }
+
+      // Add the new logs to the beginning of the array
+      logsData.value = [
+        ...(res.logs as unknown as LogEvent[]),
+        ...(logsData.value as unknown as LogEvent[]),
+      ];
+    })
+    .catch(() => {
+      push.error("Failed to fetch channel data.");
+    })
+    .finally(() => {
+      liveLogsLoading.value = false;
+    });
+};
+
+const setLiveLogs = async (value: boolean) => {
+  if (!value) {
+    if (liveLogsInterval.value) {
+      clearInterval(liveLogsInterval.value);
+    }
+    return;
+  }
+
+  liveLogsInterval.value = setInterval(async () => {
+    // Get the id of the last log
+    const lastLogId = logsData.value[0].id;
+
+    await getLiveLogs(lastLogId);
+  }, 1500);
+};
 </script>
 
 <template>
@@ -107,7 +152,19 @@ const onTimelinePeriodChange = async (value: number) => {
         content-style="padding: 0px 24px 24px 24px"
         show-trigger="arrow-circle"
       >
-        <n-collapse :default-expanded-names="['Timeline']">
+        <n-collapse :default-expanded-names="['Timeline', 'Live']">
+          <n-collapse-item title="Live" name="Live">
+            <n-switch
+              v-model:value="shouldGetLiveLogs"
+              size="large"
+              @update:value="setLiveLogs"
+              :loading="liveLogsLoading"
+            >
+              <template #icon>
+                <Icon name="meteocons:lightning-bolt-fill" />
+              </template>
+            </n-switch>
+          </n-collapse-item>
           <n-collapse-item title="Timeline" name="Timeline">
             <n-select
               v-model:value="timelinePeriod"
