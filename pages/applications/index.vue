@@ -149,7 +149,11 @@ const createApplication = () => {
         </div>
 
         <n-tag type="info">
-          {{ application.channels.length || "No environments added" }}
+          {{
+            application.channels.length
+              ? `${application.channels.length} channel${application.channels.length > 1 ? "s" : ""}`
+              : "No channels added"
+          }}
         </n-tag>
       </NuxtLink>
     </div>

@@ -14,7 +14,7 @@ const { appid, channelid } = route.params as {
 const loading = ref(false);
 const liveLogsLoading = ref(false);
 const timelinePeriod = ref(300);
-const shownLevels = ref([]);
+const shownLevels = ref<string[]>([]);
 
 const shouldGetLiveLogs = ref(false);
 
@@ -36,6 +36,14 @@ const timelinePeriodOptions = [
 ];
 
 const levelOptions = [
+  {
+    label: "Debug",
+    value: "debug",
+  },
+  {
+    label: "Trace",
+    value: "trace",
+  },
   {
     label: "Info",
     value: "info",
@@ -75,6 +83,14 @@ if (error.value) {
 if (data.value) {
   logsData.value = data.value.logs as unknown as LogEvent[];
 }
+
+const filteredLogsData = computed(() => {
+  if (shownLevels.value.length === 0) {
+    return logsData.value;
+  }
+
+  return logsData.value.filter((log) => shownLevels.value.includes(log.level));
+});
 
 const onTimelinePeriodChange = async (value: number) => {
   if (value === 0) {
@@ -173,7 +189,10 @@ const setLiveLogs = async (value: boolean) => {
         content-style="padding: 0px 24px 24px 24px"
         show-trigger="arrow-circle"
       >
-        <n-collapse :default-expanded-names="['Timeline', 'Live']">
+        <n-collapse
+          :default-expanded-names="['Timeline', 'Live', 'Level']"
+          :trigger-areas="['main', 'arrow']"
+        >
           <n-collapse-item title="Live" name="Live">
             <n-switch
               v-model:value="shouldGetLiveLogs"
@@ -207,7 +226,25 @@ const setLiveLogs = async (value: boolean) => {
               </n-flex>
             </n-checkbox-group>
 
-            <pre>{{ shownLevels }}</pre>
+            <template #header-extra>
+              <div class="h-[28px] w-[62px]">
+                <n-button
+                  quaternary
+                  round
+                  size="small"
+                  @click="shownLevels = []"
+                  v-show="shownLevels.length > 0"
+                >
+                  <template #icon>
+                    <Icon name="lets-icons:close-ring" />
+                  </template>
+
+                  <span>
+                    {{ shownLevels.length }}
+                  </span>
+                </n-button>
+              </div>
+            </template>
           </n-collapse-item>
         </n-collapse>
       </n-layout-sider>
@@ -220,11 +257,17 @@ const setLiveLogs = async (value: boolean) => {
             <div class="w-[72px]">Status</div>
             <div class="flex-1">Message</div>
             <TransitionFade>
-              <n-flex align="center" v-if="shouldGetLiveLogs">
-                <Icon name="svg-spinners:6-dots-scale-middle" />
-
-                <span> Loading new logs... </span>
-              </n-flex>
+              <n-tag
+                round
+                :bordered="false"
+                type="info"
+                v-if="shouldGetLiveLogs"
+              >
+                Loading new logs
+                <template #icon>
+                  <Icon name="svg-spinners:6-dots-scale-middle" />
+                </template>
+              </n-tag>
             </TransitionFade>
           </div>
         </n-layout-header>
@@ -235,7 +278,7 @@ const setLiveLogs = async (value: boolean) => {
               :class="{
                 'bg-slate-100': index % 2 === 0,
               }"
-              v-for="(log, index) in logsData"
+              v-for="(log, index) in filteredLogsData"
               :key="log.id"
             >
               <div class="flex w-[17px] items-center justify-center">
@@ -267,8 +310,10 @@ const setLiveLogs = async (value: boolean) => {
               <div class="w-[166px]">
                 {{ $dayjs(log.created).format("MMM DD HH:mm:ss.SSS") }}
               </div>
-              <div class="w-[72px]">{{ log.level }}</div>
-              <div>{{ log.message }}</div>
+              <div class="w-[72px]">
+                {{ log.level }}
+              </div>
+              <div class="flex-1">{{ log.message }}</div>
             </div>
           </n-spin>
         </n-layout-content>
