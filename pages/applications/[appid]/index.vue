@@ -167,14 +167,18 @@ const createChannel = () => {
       >
         <div class="flex-1">
           <div class="flex flex-col">
-            <n-flex>
-              <span
-                class="text-blue-500 transition-all hover:text-blue-600 hover:underline"
-              >
-                {{ channel.name }}
-              </span>
+            <n-flex align="center" justify="space-between">
+              <n-flex>
+                <span
+                  class="text-blue-500 transition-all hover:text-blue-600 hover:underline"
+                >
+                  {{ channel.name }}
+                </span>
 
-              <n-tag type="success">{{ channel.slug }}</n-tag>
+                <n-tag type="success">{{ channel.slug }}</n-tag>
+              </n-flex>
+
+              <n-tag type="info">{{ channel.id }}</n-tag>
             </n-flex>
 
             <p class="text-gray-500">{{ channel.description }}</p>
