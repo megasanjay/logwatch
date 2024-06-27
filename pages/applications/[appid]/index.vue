@@ -181,7 +181,7 @@ const createChannel = () => {
               <n-tag type="info">{{ channel.id }}</n-tag>
             </n-flex>
 
-            <p class="text-gray-500">{{ channel.description }}</p>
+            <p class="text-sm text-gray-500">{{ channel.description }}</p>
           </div>
         </div>
       </NuxtLink>
