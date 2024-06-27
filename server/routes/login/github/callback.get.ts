@@ -7,6 +7,12 @@ interface GitHubUser {
   login: string;
 }
 
+if (!process.env.GITHUB_ALLOWED_ORGS && !process.env.GITHUB_ALLOWED_USERS) {
+  throw new Error(
+    "GITHUB_ALLOWED_ORGS or GITHUB_ALLOWED_USERS must be provided in the environment",
+  );
+}
+
 const GITHUB_ALLOWED_ORGS = process.env.GITHUB_ALLOWED_ORGS?.split(",") ?? [];
 const GITHUB_ALLOWED_USERS = process.env.GITHUB_ALLOWED_USERS?.split(",") ?? [];
 
@@ -26,6 +32,9 @@ export default defineEventHandler(async (event) => {
 
   try {
     const tokens = await github.validateAuthorizationCode(code);
+    console.log("-----------------------");
+    console.log(GITHUB_ALLOWED_ORGS, process.env.GITHUB_ALLOWED_ORGS);
+    console.log(GITHUB_ALLOWED_USERS);
 
     const githubUserResponse = await fetch("https://api.github.com/user", {
       headers: {
@@ -42,14 +51,16 @@ export default defineEventHandler(async (event) => {
      */
 
     if (GITHUB_ALLOWED_ORGS.length > 0) {
-      const orgsResponse = await fetch("https://api.github.com/user/orgs", {
-        headers: {
-          Authorization: `Bearer ${tokens.accessToken}`,
+      const orgsResponse = await fetch(
+        `https://api.github.com/users/${githubUser.login}/orgs`,
+        {
+          headers: {
+            Authorization: `Bearer ${tokens.accessToken}`,
+          },
         },
-      });
+      );
 
       const orgs = await orgsResponse.json();
-      console.log("-----------------------");
 
       const allowedOrgs = GITHUB_ALLOWED_ORGS;
 
