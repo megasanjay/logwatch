@@ -51,11 +51,23 @@ export default defineNuxtConfig({
   ],
 
   nitro: {
-    esbuild: {
-      options: {
-        target: "esnext",
-      },
-    },
+    // ---- Uncomment for use with most other deployment mechanisms (Both server and vercel) ----
+    // esbuild: {
+    //   options: {
+    //     target: "esnext",
+    //   },
+    // },
+    // ---- Uncomment for use with most other deployment mechanisms (Both server and vercel) ----
+    // ---- Uncomment to use Azure Functions ----
+    // azure: {
+    //   config: {
+    //     platform: {
+    //       apiRuntime: "node:18",
+    //     },
+    //   },
+    // },
+    // preset: "azure",
+    // ---- Uncomment to use Azure Functions ----
   },
 
   notivue: {

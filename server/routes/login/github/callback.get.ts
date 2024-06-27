@@ -7,6 +7,9 @@ interface GitHubUser {
   login: string;
 }
 
+const GITHUB_ALLOWED_ORGS = process.env.GITHUB_ALLOWED_ORGS?.split(",") ?? [];
+const GITHUB_ALLOWED_USERS = process.env.GITHUB_ALLOWED_USERS?.split(",") ?? [];
+
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);
 
@@ -31,6 +34,50 @@ export default defineEventHandler(async (event) => {
     });
     const githubUser: GitHubUser = await githubUserResponse.json();
 
+    /**
+     * Check if the user is in the allowed orgs or users
+     * If allowed orgs are provided, the allowed users are ignored
+     * If no allowed orgs are provided, the allowed users are used
+     * If no allowed orgs or users are provided, all users are allowed
+     */
+
+    if (GITHUB_ALLOWED_ORGS.length > 0) {
+      const orgsResponse = await fetch("https://api.github.com/user/orgs", {
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`,
+        },
+      });
+
+      const orgs = await orgsResponse.json();
+      console.log("-----------------------");
+
+      const allowedOrgs = GITHUB_ALLOWED_ORGS;
+
+      const userOrgs = orgs.map((org: any) => org.login);
+
+      if (!userOrgs.some((org: any) => allowedOrgs.includes(org))) {
+        throw createError({
+          status: 403,
+          statusMessage: "User is not authorized to access this platform",
+        });
+      }
+
+      // User is in an allowed org
+    } else if (GITHUB_ALLOWED_USERS.length > 0) {
+      const allowedUsers = GITHUB_ALLOWED_USERS;
+
+      if (!allowedUsers.includes(githubUser.login)) {
+        throw createError({
+          status: 403,
+          statusMessage: "User is not authorized to access this platform",
+        });
+      }
+
+      // User is in allowed users
+    } else {
+      // All users are allowed
+    }
+
     const existingUser = await prisma.user.findFirst({
       where: {
         github_id: parseInt(githubUser.id),
@@ -38,7 +85,7 @@ export default defineEventHandler(async (event) => {
     });
 
     if (existingUser) {
-      const id = existingUser.id;
+      const { id } = existingUser;
 
       const session = await lucia.createSession(id, {});
 
@@ -70,6 +117,13 @@ export default defineEventHandler(async (event) => {
     );
     return sendRedirect(event, "/");
   } catch (e) {
+    if (e === "User is not authorized to access this platform") {
+      throw createError({
+        status: 403,
+        statusMessage: "User is not authorized to access this platform",
+      });
+    }
+
     // the specific error message depends on the provider
     if (e instanceof OAuth2RequestError) {
       // invalid code

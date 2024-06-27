@@ -11,7 +11,7 @@ const props = defineProps({
 
 const statusCode = props.error?.statusCode ?? 500;
 
-console.log(props.error.data);
+console.log("error.data", props.error);
 
 const showNotAuthorizedError = ref(false);
 const requestClosed = ref(false);
@@ -57,9 +57,16 @@ if (props.error) {
 
       <n-flex vertical size="large">
         <n-flex vertical size="large">
-          <h1 class="text-5xl font-bold">Something went wrong</h1>
+          <h1 class="text-5xl font-bold" v-if="showNotAuthorizedError">
+            You are not authorized to view this page
+          </h1>
+          <h1 class="text-5xl font-bold" v-else>Something went wrong</h1>
 
-          <p class="text-lg">
+          <p class="text-lg" v-if="showNotAuthorizedError">
+            You are not authorized to view this page. Please contact the
+            administrator.
+          </p>
+          <p class="text-lg" v-else>
             The page you are looking for might have been removed or is
             temporarily unavailable.
           </p>
