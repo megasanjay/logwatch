@@ -32,9 +32,6 @@ export default defineEventHandler(async (event) => {
 
   try {
     const tokens = await github.validateAuthorizationCode(code);
-    console.log("-----------------------");
-    console.log(GITHUB_ALLOWED_ORGS, process.env.GITHUB_ALLOWED_ORGS);
-    console.log(GITHUB_ALLOWED_USERS);
 
     const githubUserResponse = await fetch("https://api.github.com/user", {
       headers: {
