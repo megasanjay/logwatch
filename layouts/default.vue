@@ -1,66 +1,45 @@
 <script setup lang="ts">
-import { useApplicationStore } from "@/stores/application";
-
 const devMode = process.env.NODE_ENV === "development";
 
-const showMobileMenu = ref(false);
-
-const applicationStore = useApplicationStore();
 const route = useRoute();
 
 const appid = ref<string | null>(null);
 const channelid = ref<string | null>(null);
 
-const toggleMobileMenu = () => {
-  showMobileMenu.value = !showMobileMenu.value;
-};
+const allApplications = ref<
+  {
+    label: string;
+    value: string;
+  }[]
+>([]);
 
-const allApplications = computed(() => {
-  if (!appid.value) return [];
+const allChannels = ref<
+  {
+    label: string;
+    value: string;
+  }[]
+>([]);
 
-  if (!applicationStore.applications.length) {
-    return [];
-  }
+const { data: applications, error } = await useFetch("/api/applications", {
+  headers: useRequestHeaders(["cookie"]),
+});
 
-  const apps = applicationStore.applications.map((app) => {
+if (applications.value) {
+  allApplications.value = applications.value.map((app) => {
     return {
       label: app.name,
       value: app.id,
     };
   });
+}
 
-  return apps;
+const selectedApplication = computed(() => {
+  return allApplications.value.find((app) => app.value === appid.value);
 });
 
-const allChannels = computed(() => {
-  if (!appid.value) {
-    return [];
-  }
-
-  if (!applicationStore.applications.length) {
-    return [];
-  }
-
-  const application = applicationStore.applications.find(
-    (app) => app.id === appid.value,
-  );
-
-  if (!application) {
-    return [];
-  }
-
-  return application?.channels || [];
+const selectedChannel = computed(() => {
+  return allChannels.value.find((channel) => channel.value === channelid.value);
 });
-
-const getAllApplications = async () => {
-  const { data: applications, error } = await useFetch("/api/applications", {
-    headers: useRequestHeaders(["cookie"]),
-  });
-
-  if (applications.value) {
-    applicationStore.setApplications(applications as unknown as Application[]);
-  }
-};
 
 watchEffect(() => {
   const aid = route.params.appid as string;
@@ -68,22 +47,34 @@ watchEffect(() => {
 
   if (aid) {
     appid.value = aid;
-    getAllApplications();
   }
 
   if (cid) {
     channelid.value = cid;
+
+    if (applications.value) {
+      const app = applications.value.find((app) => app.id === aid);
+
+      if (app) {
+        allChannels.value = app.channels.map((channel) => {
+          return {
+            label: channel.name,
+            value: channel.id,
+          };
+        });
+      }
+    }
   }
 });
 </script>
 
 <template>
   <div
-    class="relative mx-auto flex h-full min-h-screen w-full flex-col bg-slate-50"
+    class="relative mx-auto flex h-full min-h-screen w-full flex-col"
     :class="{ 'debug-screens': devMode }"
   >
-    <div class="relative z-20 mx-auto w-full px-5">
-      <header class="mb-2 flex items-center justify-between py-4">
+    <div class="relative z-20 mx-auto w-full border-b px-5">
+      <header class="mb-2 flex items-center justify-between pb-2 pt-4">
         <nav class="items-center">
           <n-flex>
             <NuxtLink
@@ -118,7 +109,16 @@ watchEffect(() => {
                 </svg>
 
                 <n-popselect v-model:value="appid" :options="allApplications">
-                  <n-button>{{ appid }}</n-button>
+                  <NuxtLink
+                    :href="`/applications/${appid}`"
+                    class="flex items-center font-medium transition-all hover:text-slate-700"
+                  >
+                    {{
+                      selectedApplication
+                        ? selectedApplication.label
+                        : "Unknown Application"
+                    }}
+                  </NuxtLink>
                 </n-popselect>
               </n-flex>
             </TransitionFade>
@@ -145,7 +145,16 @@ watchEffect(() => {
                   :options="allChannels"
                   v-if="channelid"
                 >
-                  <n-button>{{ channelid }}</n-button>
+                  <NuxtLink
+                    :href="`/applications/${appid}/channels/${channelid}`"
+                    class="flex items-center font-medium transition-all hover:text-slate-700"
+                  >
+                    {{
+                      selectedChannel
+                        ? selectedChannel.label
+                        : "Unknown Channel"
+                    }}
+                  </NuxtLink>
                 </n-popselect>
               </n-flex>
             </TransitionFade>

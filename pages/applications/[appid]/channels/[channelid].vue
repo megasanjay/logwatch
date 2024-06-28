@@ -132,8 +132,8 @@ const getLiveLogs = async (lastLogId: number, lastLogTimestamp: number) => {
   await $fetch(`/api/applications/${appid}/channels/${channelid}/live`, {
     headers: useRequestHeaders(["cookie"]),
     query: {
-      lastLogId,
-      lastLogTimestamp,
+      ...(lastLogId && { lastLogId }),
+      ...(lastLogTimestamp && { lastLogTimestamp }),
     },
   })
     .then((res) => {
@@ -165,8 +165,9 @@ const setLiveLogs = async (value: boolean) => {
 
   liveLogsInterval.value = setInterval(async () => {
     // Get the timestamp of the last log
-    const lastLogId = logsData.value[0].id;
-    const lastLogTimestamp = dayjs(logsData.value[0].created).unix();
+    const lastLogId = logsData.value.length > 0 ? logsData.value[0].id : 0;
+    const lastLogTimestamp =
+      logsData.value.length > 0 ? dayjs(logsData.value[0].created).unix() : 0;
 
     await getLiveLogs(lastLogId, lastLogTimestamp);
   }, 1500);
