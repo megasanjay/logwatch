@@ -22,11 +22,13 @@
   },
   "dependencies": {
     "@lucia-auth/adapter-prisma": "^4.0.1",
+    "@pinia/nuxt": "^0.5.1",
     "@prisma/client": "^5.15.0",
     "arctic": "^1.6.2",
     "lucia": "^3.2.0",
     "notivue": "^2.4.4",
     "nuxt": "3.11.1",
+    "pinia": "^2.1.7",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0",
     "zod": "^3.23.5"
