@@ -102,25 +102,25 @@ onMounted(() => {
       return;
     }
 
-    // console.log("Logging event");
+    console.log("Logging event");
 
-    // await $fetch("/api/log/clxu6ihl00003j1sfrb785hia", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     message: faker.lorem.sentence(),
-    //     level: faker.helpers.arrayElement([
-    //       "info",
-    //       "warn",
-    //       "error",
-    //       "debug",
-    //       "trace",
-    //       "fatal",
-    //     ]),
-    //   }),
-    // });
+    await $fetch("/api/log/clxu6ihl00003j1sfrb785hia", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: faker.lorem.sentence(),
+        level: faker.helpers.arrayElement([
+          "info",
+          "warn",
+          "error",
+          "debug",
+          "trace",
+          "fatal",
+        ]),
+      }),
+    });
   }, 4000);
 });
 </script>

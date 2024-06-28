@@ -64,14 +64,22 @@ const createApplication = () => {
 <template>
   <main>
     <div
-      class="flex w-full items-center justify-start space-x-4 bg-white px-6 py-6"
+      class="flex w-full items-center justify-between bg-white px-6 py-3 pt-6"
     >
-      <h1 class="text-3xl font-bold text-gray-900">Applications</h1>
+      <n-flex vertical>
+        <h1 class="text-3xl font-bold text-gray-900">Applications</h1>
+
+        <p class="text-sm text-slate-600">
+          Manage your applications and their channels. Create a new application
+          to get started.
+        </p>
+      </n-flex>
 
       <n-button color="black" @click="newApplicationModal = true">
         <template #icon>
           <Icon name="mdi:plus" />
         </template>
+        Create a new application
       </n-button>
 
       <n-modal v-model:show="newApplicationModal" transform-origin="center">
@@ -127,7 +135,11 @@ const createApplication = () => {
       </n-modal>
     </div>
 
-    <div class="divide divide-y p-10">
+    <div class="mx-auto w-11/12">
+      <n-divider />
+    </div>
+
+    <div class="divide divide-y px-5">
       <NuxtLink
         :to="`/applications/${application.id}`"
         v-for="application in applications"
