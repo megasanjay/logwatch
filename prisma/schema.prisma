@@ -41,6 +41,9 @@ model Application {
   user    User   @relation(references: [id], fields: [user_id], onDelete: Cascade)
   user_id String
 
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
   channels Channel[]
 }
 
@@ -48,7 +51,6 @@ model Channel {
   id String @id @default(cuid())
 
   name String
-  slug String
 
   description String @default("")
 
@@ -59,6 +61,9 @@ model Channel {
 
   application    Application @relation(references: [id], fields: [application_id], onDelete: Cascade)
   application_id String
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
 
   Log Log[]
 }

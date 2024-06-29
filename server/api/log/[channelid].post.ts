@@ -1,8 +1,7 @@
 import { z } from "zod";
+import dayjs from "dayjs";
 
 export default defineEventHandler(async (event) => {
-  const user = protectRoute(event);
-
   const { channelid } = event.context.params as { channelid: string };
 
   const bodySchema = z
@@ -53,6 +52,42 @@ export default defineEventHandler(async (event) => {
     throw createError({
       message: "An error occurred while creating the log",
       statusCode: 500,
+    });
+  }
+
+  // hacks
+  // Delete expired logs. Only run with a random chance of 5%
+  if (Math.random() < 0.05) {
+    const channel = await prisma.channel.findFirst({
+      include: {
+        application: true,
+      },
+      where: {
+        id: channelid,
+      },
+    });
+
+    if (!channel) {
+      throw createError({
+        message: "Channel not found",
+        statusCode: 404,
+      });
+    }
+
+    const now = dayjs();
+    const { expiration } = channel; // in mins
+
+    const expirationTime = now.subtract(expiration, "minutes");
+
+    await prisma.log.deleteMany({
+      where: {
+        channel: {
+          id: channelid,
+        },
+        created: {
+          lte: expirationTime.toDate(),
+        },
+      },
     });
   }
 

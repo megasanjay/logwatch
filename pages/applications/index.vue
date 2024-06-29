@@ -62,18 +62,17 @@ const createApplication = () => {
 </script>
 
 <template>
-  <main>
+  <main class="px-3">
     <div
       class="flex w-full items-center justify-between bg-white px-6 py-3 pt-6"
     >
-      <n-flex vertical>
+      <div>
         <h1 class="text-3xl font-bold text-gray-900">Applications</h1>
 
         <p class="text-sm text-slate-600">
-          Manage your applications and their channels. Create a new application
-          to get started.
+          Manage your applications and their channels.
         </p>
-      </n-flex>
+      </div>
 
       <n-button color="black" @click="newApplicationModal = true">
         <template #icon>
@@ -135,9 +134,7 @@ const createApplication = () => {
       </n-modal>
     </div>
 
-    <div class="mx-auto w-11/12">
-      <n-divider />
-    </div>
+    <n-divider />
 
     <div class="divide divide-y px-5">
       <NuxtLink

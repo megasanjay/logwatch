@@ -3,7 +3,10 @@ import { z } from "zod";
 export default defineEventHandler(async (event) => {
   const user = protectRoute(event);
 
-  const { appid } = event.context.params as { appid: string };
+  const { appid, channelid } = event.context.params as {
+    appid: string;
+    channelid: string;
+  };
 
   const bodySchema = z
     .object({
@@ -34,21 +37,28 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const channel = await prisma.channel.create({
-    data: {
-      name: parsedBody.data.name,
-      description: parsedBody.data.description || "",
-      application_id: appid,
-      expiration: 1440, // 24 hours
+  const channel = await prisma.channel.findFirst({
+    where: {
+      id: channelid,
     },
   });
 
   if (!channel) {
     throw createError({
-      message: "An error occurred while creating the channel",
-      statusCode: 500,
+      message: "Channel not found",
+      statusCode: 404,
     });
   }
+
+  const updatedChannel = await prisma.channel.update({
+    where: {
+      id: channelid,
+    },
+    data: {
+      name: parsedBody.data.name,
+      description: parsedBody.data.description || "",
+    },
+  });
 
   return {
     statusCode: 201,

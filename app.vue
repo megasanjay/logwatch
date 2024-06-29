@@ -25,6 +25,11 @@ const themeConfig: ThemeConfig = {
   mobile: {}, // Theme options applied on mobile only
   mobileOrTablet: {}, // Theme options applied on mobile and tablet
   shared: {
+    common: {
+      primaryColor: "#1e8b71",
+      primaryColorHover: "#26ae8d",
+      primaryColorPressed: "#229d7f",
+    },
     Tree: {
       fontSize: "17px",
     },

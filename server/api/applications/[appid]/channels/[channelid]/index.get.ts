@@ -66,7 +66,7 @@ export default defineEventHandler(async (event) => {
     channel: {
       id: channel.id,
       name: channel.name,
-      slug: channel.slug,
+      description: channel.description,
       expiration: channel.expiration,
     },
     application: {

@@ -5,7 +5,11 @@ export default defineEventHandler(async (event) => {
 
   const application = await prisma.application.findUnique({
     include: {
-      channels: true,
+      channels: {
+        orderBy: {
+          created: "desc",
+        },
+      },
     },
     where: { id: appid },
   });

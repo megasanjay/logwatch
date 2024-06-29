@@ -15,12 +15,13 @@ const submitLoading = ref(false);
 const formRef = ref<FormInst | null>(null);
 const formValue = reactive({
   name: "",
-  slug: "",
   description: "",
 });
 const rules = {
   name: [{ required: true, message: "Name is required", trigger: "blur" }],
 };
+
+const searchTerm = ref("");
 
 const { data: application, error } = await useFetch(
   `/api/applications/${appid}`,
@@ -35,12 +36,21 @@ if (error.value) {
   await navigateTo("/applications");
 }
 
+const allChannels = computed(() => {
+  if (!application.value) return [];
+
+  if (!searchTerm.value) return application.value.channels;
+
+  return application.value?.channels.filter((channel) =>
+    channel.name.toLowerCase().includes(searchTerm.value.toLowerCase()),
+  );
+});
+
 const createChannel = () => {
   formRef.value?.validate(async (errors) => {
     if (!errors) {
       const body = {
         name: formValue.name,
-        slug: formValue.slug,
         description: formValue.description,
       };
 
@@ -74,19 +84,51 @@ const createChannel = () => {
     }
   });
 };
+
+const copyToClipboard = (text: string) => {
+  navigator.clipboard.writeText(text).then(() => {
+    push.success("Copied to clipboard.");
+  });
+};
+
+// if the `/` key is pressed, focus the search input
+const keypressHandler = (e: KeyboardEvent) => {
+  if (e.key === "/") {
+    e.preventDefault();
+    const searchInput = document.querySelector(
+      "input[placeholder='Search...']",
+    );
+
+    if (searchInput instanceof HTMLInputElement) {
+      searchInput.focus();
+    }
+  }
+};
+
+onMounted(() => {
+  window.addEventListener("keypress", keypressHandler);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("keypress", keypressHandler);
+});
 </script>
 
 <template>
-  <main>
+  <main class="px-3">
     <div
-      class="flex w-full items-center justify-start space-x-4 bg-white px-6 py-6"
+      class="flex w-full items-center justify-between bg-white px-6 py-3 pt-6"
     >
-      <h1 class="text-3xl font-bold text-gray-900">Channels</h1>
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Channels</h1>
+        <p class="text-sm text-slate-600">Manage your channels.</p>
+      </div>
 
       <n-button color="black" @click="newChannelModal = true">
         <template #icon>
           <Icon name="mdi:plus" />
         </template>
+        Create a new channel
       </n-button>
 
       <n-modal v-model:show="newChannelModal" transform-origin="center">
@@ -114,17 +156,6 @@ const createChannel = () => {
                 show-count
                 clearable
                 data-1p-ignore
-              />
-            </n-form-item>
-
-            <n-form-item label="Slug" path="slug">
-              <n-input
-                v-model:value="formValue.slug"
-                placeholder="stg"
-                maxlength="100"
-                show-count
-                autocomplete="off"
-                clearable
               />
             </n-form-item>
 
@@ -158,33 +189,63 @@ const createChannel = () => {
       </n-modal>
     </div>
 
-    <div class="divide divide-y p-10">
-      <NuxtLink
-        :to="`/applications/${application?.id}/channels/${channel.id}`"
-        v-for="channel in application?.channels || []"
-        :key="channel.id"
-        class="flex min-h-[65px] cursor-pointer items-center px-2 py-3 transition-all hover:bg-slate-100"
+    <n-divider />
+
+    <n-flex vertical class="px-4">
+      <n-input
+        placeholder="Search..."
+        size="large"
+        class="mb-4"
+        v-model:value="searchTerm"
       >
-        <div class="flex-1">
-          <div class="flex flex-col">
-            <n-flex align="center" justify="space-between">
-              <n-flex>
-                <span
-                  class="text-blue-500 transition-all hover:text-blue-600 hover:underline"
+        <template #prefix>
+          <Icon name="iconamoon:search-duotone" size="20" class="mr-2" />
+        </template>
+        <template #suffix>
+          <n-flex>
+            <Icon name="iconamoon:sign-division-slash-bold" />
+          </n-flex>
+        </template>
+      </n-input>
+
+      <n-card v-for="channel in allChannels || []" :key="channel.id">
+        <n-flex align="center" justify="space-between">
+          <NuxtLink
+            :to="`/applications/${application?.id}/channels/${channel.id}`"
+            class="text-base text-blue-500 transition-all hover:text-blue-600 hover:underline"
+          >
+            {{ channel.name }}
+          </NuxtLink>
+          <n-flex>
+            <n-tooltip trigger="hover">
+              <template #trigger>
+                <n-tag
+                  type="primary"
+                  @click="copyToClipboard(channel.id)"
+                  class="cursor-copy"
+                  >{{ channel.id }}</n-tag
                 >
-                  {{ channel.name }}
-                </span>
+              </template>
+              <span> Click to copy channel ID </span>
+            </n-tooltip>
 
-                <n-tag type="success">{{ channel.slug }}</n-tag>
-              </n-flex>
+            <NuxtLink
+              :to="`/applications/${application?.id}/channels/${channel.id}/settings`"
+            >
+              <n-button size="small" type="primary">
+                <template #icon>
+                  <Icon name="ic:round-settings" />
+                </template>
+                Settings
+              </n-button>
+            </NuxtLink>
+          </n-flex>
+        </n-flex>
 
-              <n-tag type="info">{{ channel.id }}</n-tag>
-            </n-flex>
-
-            <p class="text-sm text-gray-500">{{ channel.description }}</p>
-          </div>
-        </div>
-      </NuxtLink>
-    </div>
+        <p class="min-h-[20px] text-sm text-gray-500">
+          {{ channel.description }}
+        </p>
+      </n-card>
+    </n-flex>
   </main>
 </template>
