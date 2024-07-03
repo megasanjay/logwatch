@@ -33,6 +33,10 @@ export default defineNuxtConfig({
 
   devtools: { enabled: true },
 
+  helm: {
+    crossOriginResourcePolicy: "cross-origin",
+  },
+
   modules: [
     "@nuxtjs/tailwindcss",
     "@bg-dev/nuxt-naiveui",
@@ -40,6 +44,7 @@ export default defineNuxtConfig({
     "@nuxtjs/color-mode",
     "dayjs-nuxt",
     "@pinia/nuxt",
+    "nuxt-helm",
     [
       "@nuxtjs/google-fonts",
       {

@@ -2,6 +2,13 @@ import { Lucia } from "lucia";
 import { PrismaAdapter } from "@lucia-auth/adapter-prisma";
 import { GitHub } from "arctic";
 import { PrismaClient } from "@prisma/client";
+import { webcrypto } from "node:crypto";
+
+// If we are in a node 18 environment, we need to polyfill webcrypto
+if (process.version.startsWith("v18")) {
+  // @ts-ignore
+  globalThis.crypto = webcrypto as Crypto;
+}
 
 const client = new PrismaClient();
 
