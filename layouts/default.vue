@@ -66,6 +66,25 @@ watchEffect(() => {
     }
   }
 });
+
+const updateAppRoute = (value: string) => {
+  channelid.value = null;
+  if (value) {
+    navigateTo(`/applications/${value}`);
+  } else {
+    navigateTo("/");
+  }
+};
+
+const updateChannelRoute = (value: string) => {
+  if (appid.value && value) {
+    navigateTo(`/applications/${appid.value}/channels/${value}`);
+  } else if (appid.value) {
+    navigateTo(`/applications/${appid.value}`);
+  } else {
+    navigateTo("/");
+  }
+};
 </script>
 
 <template>
@@ -108,7 +127,11 @@ watchEffect(() => {
                   <path d="M16.88 3.549L7.12 20.451"></path>
                 </svg>
 
-                <n-popselect v-model:value="appid" :options="allApplications">
+                <n-popselect
+                  v-model:value="appid"
+                  :options="allApplications"
+                  @update:value="updateAppRoute"
+                >
                   <NuxtLink
                     :href="`/applications/${appid}`"
                     class="flex items-center font-medium transition-all hover:text-slate-700"
@@ -144,6 +167,7 @@ watchEffect(() => {
                   v-model:value="channelid"
                   :options="allChannels"
                   v-if="channelid"
+                  @update:value="updateChannelRoute"
                 >
                   <NuxtLink
                     :href="`/applications/${appid}/channels/${channelid}`"
