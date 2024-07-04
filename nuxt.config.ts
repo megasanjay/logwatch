@@ -33,9 +33,9 @@ export default defineNuxtConfig({
 
   devtools: { enabled: true },
 
-  helm: {
-    crossOriginResourcePolicy: "cross-origin",
-  },
+  // helm: {
+  //   crossOriginResourcePolicy: "cross-origin",
+  // },
 
   modules: [
     "@nuxtjs/tailwindcss",
@@ -44,7 +44,7 @@ export default defineNuxtConfig({
     "@nuxtjs/color-mode",
     "dayjs-nuxt",
     "@pinia/nuxt",
-    "nuxt-helm",
+    // "nuxt-helm",
     [
       "@nuxtjs/google-fonts",
       {
@@ -60,7 +60,7 @@ export default defineNuxtConfig({
     azure: {
       config: {
         platform: {
-          apiRuntime: "node:18",
+          apiRuntime: "node:20",
         },
       },
     },
