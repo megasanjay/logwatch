@@ -63,10 +63,10 @@
     "tailwindcss-debug-screens": "^2.2.1"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=18.0.0"
   },
   "volta": {
-    "node": "20.9.0",
+    "node": "18.18.2",
     "yarn": "1.22.19"
   }
 }
