@@ -42,6 +42,9 @@ const createApplication = () => {
             push.success("Application created successfully.");
 
             newApplicationModal.value = false;
+
+            formValue.name = "";
+            formValue.description = "";
           } else {
             push.error("Failed to create application.");
           }

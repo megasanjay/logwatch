@@ -67,6 +67,9 @@ const createChannel = () => {
             push.success("Channel created successfully.");
 
             newChannelModal.value = false;
+
+            formValue.name = "";
+            formValue.description = "";
           } else {
             push.error("Failed to create channel.");
           }
