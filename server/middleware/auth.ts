@@ -11,6 +11,11 @@ export default defineEventHandler(async (event) => {
       !hostHeader ||
       !verifyRequestOrigin(originHeader, [hostHeader])
     ) {
+      // Check if in the /log api endpoint
+      if (event.node.req.url?.startsWith("/api/log")) {
+        return;
+      }
+
       return event.node.res.writeHead(403).end();
     }
   }
