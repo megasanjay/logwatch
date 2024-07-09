@@ -56,6 +56,12 @@ export default defineNuxtConfig({
     "nuxt-icon",
   ],
 
+  routeRules: {
+    "/api/log/**": {
+      cors: true,
+    },
+  },
+
   nitro: {
     // azure: {
     //   config: {
