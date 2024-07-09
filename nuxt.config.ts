@@ -57,14 +57,14 @@ export default defineNuxtConfig({
   ],
 
   nitro: {
-    azure: {
-      config: {
-        platform: {
-          apiRuntime: "node:18",
-        },
-      },
-    },
-    preset: "azure",
+    // azure: {
+    //   config: {
+    //     platform: {
+    //       apiRuntime: "node:18",
+    //     },
+    //   },
+    // },
+    // preset: "azure",
   },
 
   notivue: {
