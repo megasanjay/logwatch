@@ -149,6 +149,9 @@ const getLiveLogs = async (lastLogId: number, lastLogTimestamp: number) => {
         ...(res.logs as unknown as LogEvent[]),
         ...(logsData.value as unknown as LogEvent[]),
       ];
+
+      // Keep only the last 1500 logs
+      logsData.value = logsData.value.slice(0, 1500);
     })
     .catch(() => {
       push.error("Failed to fetch channel data.");
@@ -173,7 +176,7 @@ const setLiveLogs = async (value: boolean) => {
       logsData.value.length > 0 ? dayjs(logsData.value[0].created).unix() : 0;
 
     await getLiveLogs(lastLogId, lastLogTimestamp);
-  }, 1500);
+  }, 2000);
 };
 
 const copyToClipboard = (text: string) => {
