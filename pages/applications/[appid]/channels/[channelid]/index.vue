@@ -151,7 +151,9 @@ const getLiveLogs = async (lastLogId: number, lastLogTimestamp: number) => {
       ];
 
       // Keep only the last 1500 logs
-      logsData.value = logsData.value.slice(0, 1500);
+      if (logsData.value.length > 1500) {
+        logsData.value = logsData.value.slice(0, 1500);
+      }
     })
     .catch(() => {
       push.error("Failed to fetch channel data.");
