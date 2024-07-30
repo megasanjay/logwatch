@@ -9,9 +9,9 @@ export default defineEventHandler(async (event) => {
       description: true,
       channels: true,
     },
-    where: {
-      user_id: user.id,
-    },
+    // where: {
+    //   user_id: user.id,
+    // },
   });
 
   return applications || [];

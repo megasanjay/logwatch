@@ -1,4 +1,10 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const user = useUser();
+
+if (user.value) {
+  navigateTo("/applications");
+}
+</script>
 
 <template>
   <main>
